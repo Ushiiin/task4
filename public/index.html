@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="css/style.css">
+    <title>強制川柳</title>
+</head>
+<body>
+
+<header>
+    <h1 class="header">強制川柳</h1>
+</header>
+
+<!-- コンテンツ表示画面 -->
+
+<div>
+    <div class="center margin30"> 詠み手：<input type="text" id="uname"> </div>
+    <div class="center" id="input">
+        句：<input id="text" cols="30" rows="2"> <br>
+        <button class="margin30" id="send">送信</button>
+    </div>
+
+    <!--新しくできた俳句-->
+    <div class="wrapper">
+        <div class="item">
+            <p id="senryu"></p>
+            <button id="save">保存</button>
+
+            <div class="box">
+                <div id="output"></div>
+            </div>
+        </div>
+
+        <div class="item" id="save_loc">
+            <h2>優秀作品</h2>
+        </div>
+    </div>
+
+
+</div>
+<!--/ コンテンツ表示画面 -->
+
+
+
+<!-- JQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!-- JQuery -->
+
+
+<!--** 以下Firebase **-->
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
+    import {
+        getDatabase,
+        ref,
+        push,
+        set,
+        onChildAdded,
+        remove,
+        onChildRemoved,
+    } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
+    // Your web app's Firebase configuration
+
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getDatabase(app); //RealtimeDBに接続
+    const dbRef = ref(db,"chat"); //RealtimeDB内の"chat"を使う
+
+    let even = 0;
+
+    // 送信の画面が押されたらデータを登録する処理
+    $("#send").on("click", function() {
+        // alert("X");
+        const uname = $("#uname").val();
+        const text = $("#text").val();
+        // 入力されたものが取得できているか必ず確認！
+        console.log(uname, text);
+
+        // オブジェクト（塊）を作る。
+        const msg = {
+            uname: uname,
+            text: text,
+        };
+
+        const newPostRef = push(dbRef);
+        set(newPostRef, msg);
+
+
+        //1回目自力→2回目自動→3回目自力を繰り返す
+        if (even%2 == 0) {
+            console.log("test");
+            const mid_msg = {
+                uname: "PC",
+                text: "夕飯食べた"
+            };
+            const newPostRef = push(dbRef);
+            set(newPostRef, mid_msg);
+        };
+        even++;
+        console.log("EVEN",even);
+
+        //入力欄を空にする。
+        if (even%2 == 0){
+            console.log("empty")
+            $("#uname").val("");
+        };
+        $("#text").val("");
+
+    });
+
+    var words = [];
+    var cnt = 0;
+
+    //受信処理
+    onChildAdded(dbRef, function(data) {
+        const msg = data.val();
+        console.log(msg, "GETS")
+        const kagi = data.key;
+        words.push(msg.text);
+        console.log(words);
+
+        cnt++;
+        let html = `
+            <div class="${kagi}">
+                <p>${msg.uname}:
+                ${msg.text}</p>
+            </div>
+        `
+        console.log(html);
+        $("#output").prepend(html);
+        console.log("cnt",cnt);
+        if (cnt%3 == 0) {
+            const words_length = words.length;
+            console.log(words_length);
+            let new_senryu = words[words_length-3] + " " + words[words_length-2] + " " + words[words_length-1];
+            console.log(new_senryu);
+            new_senryu += " by " + msg.uname;
+            $("#senryu").html(new_senryu);
+        } else{
+            $("#senryu").html("");
+        }
+    });
+
+    $("#save").on("click", function() {
+        let hozon = document.querySelector("#senryu").innerHTML;
+        if (hozon == "") return;
+        hozon += "<br>"
+        console.log(hozon);
+        $("#save_loc").append(hozon);
+    });
+
+</script>
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
