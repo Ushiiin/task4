@@ -61,14 +61,16 @@
         onChildRemoved,
     } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
     // Your web app's Firebase configuration
-
+    const firebaseConfig = {
+    };
 
     const app = initializeApp(firebaseConfig);
     const db  = getDatabase(app); //RealtimeDBに接続
     const dbRef = ref(db,"chat"); //RealtimeDB内の"chat"を使う
 
     let even = 0;
-
+    const haiku_list = ['白い椿と', '隣は何を', 'つるべとられて', '佐渡に横たふ', '雪がふうはり', '一輪ほどの', '鐘が鳴るなり', '捨てどころなし', '十四五本も', '終(つい)のすみかか', '集めてはやし', '竹に音あり', '岩にしみ入る', '花の上なる', 'そこのけそこのけ', '夢は枯(か)れ野を', '日の当たりたる', 'つわものどもが', '月は東に', '洗ひたてたる', 'ひねもすのたり', '蛙(かわず)とびこむ', '池をめぐりて', 'とってくれろと', '山ほととぎす', '負けるな一茶', 'はえが手をする', '草葉をつかむ', '村一ぱいの', 'へちまの水も']
+    const haiku_len = haiku_list.length
     // 送信の画面が押されたらデータを登録する処理
     $("#send").on("click", function() {
         // alert("X");
@@ -88,11 +90,12 @@
 
 
         //1回目自力→2回目自動→3回目自力を繰り返す
+        let haiku_idx = Math.floor(Math.random() * haiku_len);
         if (even%2 == 0) {
             console.log("test");
             const mid_msg = {
                 uname: "PC",
-                text: "夕飯食べた"
+                text: haiku_list[haiku_idx] //"夕飯食べた"
             };
             const newPostRef = push(dbRef);
             set(newPostRef, mid_msg);
